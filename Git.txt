@@ -1,0 +1,359 @@
+Git简介
+	目前最先进的分布式版本控制系统（没有之一）
+	CVS和SVN这些集中式版本控制系统不但速度慢，且必须联网才能用。
+	Linux一开始作者手工合并方式合并代码，后代码量太大，BitKeeper出于人道免费提供Linus社区使用。后社区会员欲破解协议，故闹翻。Linux两周写出Git。
+	Linus痛恨CVS及SVN集中式版本控制系统。Git为分布式版本控制工具。区别在于集中式版本控制中央集权，Git不需要联网，每个节点都是版本库。
+
+Git安装
+	
+	Linux
+	
+		输入git测试是否安装了Git。然后会告诉你如何安装。若使用Ubuntu和Debian，则通过“sudo apt-get install git”命令就可以直接完成Git的安装。
+	
+	Mac OS X
+	
+		一是安装homebrew，然后通过homebrew安装Git，具体方法http://brew.sh/.
+		二是从AppStore安装Xcode，Xcode集成了Git,不过默认没有安装，需要运行Xcode，选择菜单“Xcode”->"preferences"，弹窗中找到“Downloads”，选择“Command Line Tools”，点“Install”即可安装。
+	
+	Windows
+	
+		日常吐槽windows是最垃圾开发平台。
+		windows下要使用很多Linux/Unix的工具时，需要Cygwin这样的模拟环境，Git也一样。其安装较复杂，我们使用的是集成好的，镜像https://git-for-windows.github.io。
+		安装完成后在开始菜单找到Git->Git Bash，然后设置用户名邮箱
+			$ git config --global user.name "Your Name"
+			$ git config --global user.email "email@example.com"
+创建版本库
+	
+	创建文件夹，windows下注意别包含中文，以免出现问题（pwd显示当前目录）
+	$ mkdir learngit
+	$ cd learngit
+	$ pwd
+	/Users/michael/learngit
+	
+	通过git init命令把这个目录变成Git可以管理的仓库
+	$ git init
+	Initialized empty Git repository in /Users/michael/learngit/.git/
+	
+	添加文件
+	1、不要使用windows自带记事本
+	2、UTF-8 NO BOM
+	3、版本控制软件只能跟踪文本文件的改动，如TXT、网页、程序代码。图片视频等二进制文件无法跟踪文件的变化。word格式为二进制格式。
+	
+	第一步：把文件添加到仓库
+	$ git add readme.txt
+	
+	第二步：用命令git commit 告诉Git，把文件提交到仓库
+	$ git commit -m "wrote a readme file"
+	[master (root-commit) cb926e7] wrote a readme file
+	 1 file changed, 2 insertions(+)
+	 create mode 100644 readme.txt
+	 
+版本控制
+	
+	git status命令查看工作区当前状态
+	$ git status
+	
+	git diff命令查看修改前后不同
+	$ git diff readme.txt 
+	
+	git log 查看提交日志
+	$ git log
+	
+	版本回退，git reset -- hard HEAD^ 上个版本就是^，多个即多个，HEAD~100,也可以直接写版本号前几位
+	$ git reset --hard HEAD^
+	$ git reset --hard 3628164
+	
+	查看文件具体内容
+	$ cat readme.txt
+	
+	查看命令记录，查看后会显示某个版本有哪些命令，进而可以恢复到新版本
+	$ git reflog
+	
+	工作区：电脑里可以看到的目录
+	版本库：隐藏目录.git不算工作区，而是Git的版本库
+	Git版本库里包括很多东西，其中最重要的是stage（或者叫index）的缓存区，还有Git为我们自动创建的分之master以及指向master的一个指针HEAD。
+	git add将文件（修改）添加到缓存区。git commit提交更改，即把暂存区提交到当前分支。
+	
+管理修改
+	
+	Git跟踪管理的是修改，而非文件，故比其他版本控制系统优秀。
+	
+	git checkout --readme.txt把readme.txt文件在工作区的修改全部撤销
+	1、修改后尚未放到暂存区，撤销修改就回到和版本库一致的状态。
+	2、添加到暂存区后又做了修改，撤销修改就回到添加暂存后的状态。
+	总之，就是让这个文件回到最近一次git commit或git add时的状态。注意--，若未添加--，则变成了切换到另一个分支命令。
+	
+删除
+	文件中删除文件后，工作区无该文件，版本库还有文件
+	使用git status即可查看工作区与版本库区别。
+	
+	$ git rm test.txt
+	$ git commit -m "删除了某文件"
+	
+	另一种办法是恢复版本库，修改的内容无法保存。
+	
+	$ git checkout -- test.txt
+	命令git checkout其实是版本库里的版本替换工作区的版本
+	
+远程仓库
+
+	1、一台电脑充当服务器24小时开机。
+	2、一台电脑可以克隆多个版本库。（一个硬盘无意义）
+	3、GitHub
+	
+	GitHub使用
+	
+	1、申请SSH Key。 （本地Git仓库和GitHub仓库传输使用SSH加密的。Git支持SSH协议。 查看用户账号主目录，若已有.ssh目录，且包含id_rsa（私钥保密）和id_rsa.pub（公钥可告诉别人），则不用申请）。打开Shell，windows下打开Git Bush
+	$ ssh-keygen -t rsa -C "youremail@example.com"
+	一路回车，（非军事用途无必要设置密码）。
+	
+	2、GitHub添加SSH Key。setting->SSH Key。如果想没台电脑都更新库，需要每台电脑都添加SSH，所以建议SSH Key title区分标明。
+	
+添加远程库
+
+	1、GitHub上创建网上仓库：+->new repo -> 仓库名字等
+	2、本地仓库和服务器仓库关联
+		$ git remote add origin git@github.com:michaelliao/learngit.git
+	3、本地仓库推送到服务器仓库
+		$ git push -u origin master
+		由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令如下。
+		$ git push origin master
+	
+从远程库克隆
+
+	$ git clone git@github.com:michaelliao/gitskills.git
+	
+	要克隆一个仓库，首先必须知道仓库的地址，然后使用git clone命令克隆。
+	Git支持多种协议，包括https，但通过ssh支持的原生git协议速度最快。
+	
+分支管理
+
+	分支相当于平行宇宙，互不影响又共同前进。如分配任务你每天提交会影响别人工作，不提交又无法保存工作进度。
+	创建自己分支，不影响别人工作，只有自己看到，最后再合并到原来分支。
+	其他版本控制系统如SVN也存在分支，但是创建和切换分支比蜗牛还慢。
+	
+创建于合并分支
+
+	master分支，主分支。HEAD严格来说，不是指向提交，而是指向master，master才是指向提交的
+	
+	创建分支
+	
+	$ git checkout -b dev
+	Switched to a new branch 'dev'
+	
+	git checkout命令加上-b参数表示创建并切换，相当于
+	
+	$ git branch dev
+	$ git checkout dev
+	Switched to branch 'dev'
+	
+	查看当前分支
+	$ git branch
+	* dev
+	master
+	
+	提交
+	$ git add readme.txt 
+	$ git commit -m "branch test"
+	[dev fec145a] branch test
+	1 file changed, 1 insertion(+)
+	
+	切换分支
+	$ git checkout master
+	Switched to branch 'master'
+	
+	合并分支
+	$ git merge dev
+	Updating d17efd8..fec145a
+	Fast-forward
+	 readme.txt |    1 +
+	 1 file changed, 1 insertion(+)
+	
+	删除分支（合并完成后即可删除分支）
+	$ git branch -d dev
+	Deleted branch dev (was fec145a)
+	
+	解决冲突
+	>当分支和主分支出现同一文件不同时会出现冲突，此时要解决完冲突才能合并分支。
+	
+	分支管理策略
+	>合并分支默认Fast forward模式，该模式删除分支后丢失分支信息。
+	>强制禁用该模式，Git会在merge时生成一个新的commit，加-m，从分支历史可看分支信息
+	$ git merge --no-ff -m "merge with no-ff" dev
+	Merge made by the 'recursive' strategy.
+	 readme.txt |    1 +
+	 1 file changed, 1 insertion(+)
+	
+	查看log历史即可看到分支信息
+	
+分支策略
+	实际开发中，按照几个基本原则进行分支管理，
+	1、master分支应非常稳定，仅用来发布新版本，不可在上面干活。
+	2、平时干活都在dev上，dev不稳定，发布新版本再把dev合并到master。
+	3、各自工作再另外各自分支。
+	
+Bug分支
+	开发中，dev分支上工作尚未完成提交，接到master上bug任务，需要先保存dev上的工作（隐藏工作区），提交的话未完成，不提交的话，修复bug时可能会覆盖文件。然后新建分支，处理bug，合并分支，删除bug分支，显示dev工作区。
+	
+	隐藏工作区
+	$ git stash
+	切换到主分支
+	$ git checkout master
+	新建bug分支
+	$ git checkout -b issue-101
+	修复bug
+	提交
+	$ git add readme.txt
+	$ git commit -m "fix bug 101"
+	合并并删除bug分支
+	$ git checkout master
+	$ git merge --no-ff -m "merged bug fix 101" issue-101
+	$ git branch -d issue-101
+	查看隐藏工作区列表
+	$ git stash list 
+	恢复工作区（并把stash内容删除）
+	$ git stash pop 
+	另一种方法，恢复和删除分两步
+	$ git stash apply
+	$ git stash pop
+	
+	强制删除分支（未合并的，需要强制删除，删除后会丢掉修改）
+	$ git branch -d feature-vulcan
+	删除远程分支
+	git push origin :[要删除的远程分支名字]
+	
+多人协作
+
+	从远程仓库克隆时，Git自动把本地master分支和远程master分支对应起来，并且，远程仓库默认名称是origin时，要查看远程库的信息git remote
+	更详细信息git remote -v
+	$ git remote -v
+	origin  git@github.com:michaelliao/learngit.git (fetch)
+	origin  git@github.com:michaelliao/learngit.git (push)
+	上面显示了可以抓取和推送的origin地址，若无推送权限，看不到push地址
+	
+	哪些分支需要推送，哪些不需要推送
+	master分支是主分支，要保持和远程同步
+	dev是工作分支，需要保持同步
+	feature分支是否推送到远程，取决于你是否和你的小伙伴合作在上面开发。
+	Git中，分支完全可以自己在本地自己藏着玩，是否推送看自己
+	
+	抓取分支
+	1、当你的小伙伴从远程库clone时，默认情况下你的小伙伴只能看到本地的master分支。要在dev分支上开发必须创建远程origin的dev分支到本地。
+	$ git checkout -b dev origin/dev
+	2、此时即可推送
+	$ git commit -m "add/usr/bin/env"
+	3、然后小伙伴添加推送后，你再推送会提示错误，需要先pull把远程分支抓下来和本地合并，pull错误，需要建立分支连接
+	$ git branch --set-upstream dev origin/dev
+	
+	$ git pull 
+	
+	$ git commit -m "提交内容备注"
+	
+多人协作工作模式
+	1、首先，可以试图用git push origin branch-name推送自己的修改；
+	2、如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+	3、如果合并有冲突，则解决冲突，并在本地提交；
+	4、没有冲突或者解决掉冲突后，再用git push origin branch-name推送就能成功！
+	如果git pull提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream branch-name origin/branch-name。
+	
+标签管理
+
+	发布一个版本时，加一个tag，确定版本号，Git的标签虽然是版本库的快照，但其实就是指向某个commit的指针，所以创建和删除标签都是瞬间完成的。
+	
+	Git和commit比起来就是方便，有意义，容易理解记忆。
+	
+	创建标签
+	切换到需要打标签的分支并打标签
+	$ git branch
+	$ git checkout master
+	$ git tag v1.0
+	命令git tag查看所有标签
+	$ git tag
+	
+	默认标签是打在最新提交的commit上，若在打标签时忘了，可查看历史提交的commit，然后打上
+	$ git log --pretty=online --abbrev-commit
+	$ git tag v0.9 6223948
+	标签是按字母顺序而不是时间顺序
+	$ git show v0.9     //查看标签信息
+	创建带说明标签
+	$ git tag -a v0.9 -m "version 0.9" 727838
+	命令git show可查看信息
+	通过-s用私钥签名一个标签
+	$ git tag -s v0.2 -m "signed version v0.3 released" 2983782
+	签名采用PGP签名，需要安装gpg。
+	
+	删除标签（本地）
+	$ git tag -d v0.1
+	推送标签(推送某个标签到远程)
+	$ git push origin v1.0
+	一次性推送全部尚未推送到远程的本地标签
+	$ git push origin --tags
+	已推送到远程的标签删除需要先从本地删除再从远程删除
+	$ git tag -d v0.9
+	$ git push origin :refs/tags/v0.9
+	
+GitHub
+	一些公共开源框架提交bug
+	
+码云
+	国内Git，速度比Git快
+	方法和GitHub一样，可以同时关联GitHub和gitee
+	使用多个远程库时，我们要注意，git给远程库起的默认名称是origin，如果有多个远程库，我们需要用不同的名称来标识不同的远程库。
+	
+自定义Git
+	显示颜色，Git会适当的显示不同的颜色
+	$ git config --global color.ui true
+	
+Git忽略特殊文件
+
+	有些文件放到Git工作目录中，但又不能提交他们，例如账号密码的配置文件，每次git status都会显示未提交的内容，看着不爽。可以编写.gitignore文件。
+	文件在git根目录下编写。
+
+		方法一（最直接）：	在资源管理创建文件时，文件命名“.gitignore.”，注意结尾有个.号，回车确认时系统会自动存成.gitignore。
+
+		方法二：		打开文本编辑器，保存时文件名输入“.gitignore”，保存类型选“所有文件”、
+		方法三：
+		进入cmd命令行，执行 echo > .gitignore 输入空内容并创建文件，或执行 rename somefile .gitignore、copy somefile .gitignore 从已有文件复制、重命名。
+	
+		# 此为注释 – 将被 Git 忽略
+
+		*.cs       # 忽略所有 .cs 结尾的文件
+		!ABC.cs    # 但 ABC.cs 除外
+		/BLL       # 仅仅忽略项目根目录下的 BLL 文件，不包括 subdir/BLL
+		build/     # 忽略 build/ 目录下的所有文件
+		doc/*.txt  # 会忽略 doc/notes.txt 但不包括 doc/server/arch.txt
+	
+	若发现添加某个文件不成功，可能被忽略了。
+	方法一：强制添加
+	$ git add -f App.class
+	方法二：修改.gitignore文件
+	
+配置别名
+	即简化命令，
+	$ git config --global alias.st status
+	$ git config --global alias.co checkout
+	$ git config --global alias.ci commit
+	将status简化st，checkout简化co
+	global参数是表示全局参数，也就是这些命令在这台电脑的所有Git仓库都可用
+	如果不加global，只针对当前仓库起作用
+	
+	$ git config --global alias.last 'log -1'
+	相当于
+	$ git last
+	commit adca45d317e6d8a4b23f9811c3d7b7f0f180bfe2
+	Merge: bd6ae48 291bea8
+	Author: Michael Liao <askxuefeng@gmail.com>
+	Date:   Thu Aug 22 22:49:22 2013 +0800
+
+    merge & fix hello.py
+	
+	$ git config --global alias.unstage 'reset HEAD'
+	相当于
+	$ git unstage test.py
+	
+	配置文件放哪了？每个仓库的Git配置文件都放在.git/config文件中：
+	别名就在[alias]后面，要删除别名，直接把对应的行删掉即可。
+	而当前用户的Git配置文件放在用户主目录下的一个隐藏文件.gitconfig中：
+	
+搭建本地Git服务器
+	需要用Linux
